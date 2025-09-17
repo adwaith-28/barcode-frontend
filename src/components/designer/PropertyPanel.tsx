@@ -240,6 +240,45 @@ const PropertyPanel = () => {
           </div>
         );
 
+      case 'image':
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="src" className="text-xs">Upload Image</Label>
+              <Input
+                id="src"
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      handlePropertyChange('src', reader.result as string);
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+                className="h-8"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="alt" className="text-xs">Alt Text</Label>
+              <Input
+                id="alt"
+                value={selectedElement.properties.alt || ''}
+                onChange={(e) => handlePropertyChange('alt', e.target.value)}
+                className="h-8"
+              />
+            </div>
+
+            <Separator />
+            {commonProperties}
+          </div>
+        );
+
+
       case 'rectangle':
         return (
           <div className="space-y-4">
