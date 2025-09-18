@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,7 +26,12 @@ import {
   Loader2
 } from 'lucide-react';
 
-const ToolbarActions = () => {
+// Props to accept templateId for edit mode
+interface ToolbarActionsProps {
+  templateId?: number;
+}
+
+const ToolbarActions: React.FC<ToolbarActionsProps> = ({ templateId }) => {
   const { toast } = useToast();
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -51,12 +56,30 @@ const ToolbarActions = () => {
     updateCanvasSettings
   } = useDesignerStore();
 
-  const { createTemplate, updateTemplate } = useTemplateStore();
+  const { 
+    createTemplate, 
+    updateTemplate,
+    currentTemplate: currentTemplateFromStore,
+    fetchTemplate 
+  } = useTemplateStore();
 
+  // Extract required fields from template elements
+  const extractRequiredFields = (template: any) => {
+    const fields = new Set<string>();
+    
+    template.elements.forEach((element: any) => {
+      if (element.properties?.dataField) {
+        fields.add(element.properties.dataField);
+      }
+    });
+    
+    return Array.from(fields);
+  };
+
+  // Save or update template
   const handleSave = async () => {
     if (!currentTemplate) return;
 
-    // Validate required fields
     if (!templateInfo.name.trim()) {
       toast({
         title: "Name required",
@@ -76,17 +99,26 @@ const ToolbarActions = () => {
         height: currentTemplate.height,
         requiredFields: extractRequiredFields(currentTemplate),
         category: templateInfo.category,
-        isPublic: templateInfo.isPublic
+        isPublic: templateInfo.isPublic,
+        previewImage: '/api/placeholder/300/200',
       };
 
-      await createTemplate(templateData);
-      
-      toast({
-        title: "Template saved",
-        description: "Your template has been saved successfully."
-      });
+      if (templateId) {
+        // Update existing template
+        await updateTemplate(templateId, templateData);
+        toast({
+          title: "Template updated",
+          description: "Your template has been updated successfully."
+        });
+      } else {
+        // Create new template
+        await createTemplate(templateData);
+        toast({
+          title: "Template saved",
+          description: "Your template has been saved successfully."
+        });
+      }
 
-      // Close dialog and reset form
       setIsSaveDialogOpen(false);
       setTemplateInfo({
         name: '',
@@ -105,18 +137,24 @@ const ToolbarActions = () => {
     }
   };
 
-  // Extract required fields from template elements
-  const extractRequiredFields = (template: any) => {
-    const fields = new Set<string>();
-    
-    template.elements.forEach((element: any) => {
-      if (element.properties?.dataField) {
-        fields.add(element.properties.dataField);
-      }
-    });
-    
-    return Array.from(fields);
-  };
+  // Prefill template info when editing
+  useEffect(() => {
+    if (templateId && currentTemplateFromStore) {
+      setTemplateInfo({
+        name: currentTemplateFromStore.name,
+        description: currentTemplateFromStore.description || '',
+        category: currentTemplateFromStore.category || 'Custom',
+        isPublic: currentTemplateFromStore.isPublic || false
+      });
+    }
+  }, [templateId, currentTemplateFromStore]);
+
+  // Fetch template if editing
+  useEffect(() => {
+    if (templateId) {
+      fetchTemplate(templateId);
+    }
+  }, [templateId, fetchTemplate]);
 
   const handleZoomChange = (zoom: number) => {
     updateCanvasSettings({ zoom: Math.max(0.25, Math.min(4, zoom)) });
@@ -252,12 +290,12 @@ const ToolbarActions = () => {
               className="bg-gradient-primary hover:opacity-90 border-0"
             >
               <Save className="h-4 w-4 mr-2" />
-              Save Template
+              {templateId ? "Update Template" : "Save Template"}
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>Save Template</DialogTitle>
+              <DialogTitle>{templateId ? "Update Template" : "Save Template"}</DialogTitle>
               <DialogDescription>
                 Give your template a name and description so you can find it later.
               </DialogDescription>
@@ -336,12 +374,12 @@ const ToolbarActions = () => {
                 {isSaving ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Saving...
+                    {templateId ? "Updating..." : "Saving..."}
                   </>
                 ) : (
                   <>
                     <Save className="h-4 w-4 mr-2" />
-                    Save Template
+                    {templateId ? "Update Template" : "Save Template"}
                   </>
                 )}
               </Button>

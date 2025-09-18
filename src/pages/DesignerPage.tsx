@@ -54,7 +54,7 @@ const DesignerPage = () => {
         <div className="flex-1 flex flex-col">
           {/* Toolbar */}
           <div className="bg-card border-b border-border p-4">
-            <ToolbarActions />
+            <ToolbarActions templateId={id ? parseInt(id) : undefined} />
           </div>
 
           {/* Canvas Area */}

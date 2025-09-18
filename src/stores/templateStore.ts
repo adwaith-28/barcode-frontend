@@ -25,6 +25,7 @@ interface TemplateStore {
   updateTemplate: (id: number, updates: any) => Promise<Template | null>;
   deleteTemplate: (id: number) => Promise<boolean>;
   duplicateTemplate: (id: number) => Promise<Template | null>;
+
   
   // Filter actions
   setCategory: (category: TemplateCategory) => void;
