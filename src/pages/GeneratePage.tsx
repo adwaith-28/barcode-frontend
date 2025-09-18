@@ -88,8 +88,9 @@ const GeneratePage = () => {
     try {
       const blob = await apiService.previewLabel({
         templateId: parseInt(id),
+        layoutJson: template.layoutJson,
         data: formData,
-        format: 'png'
+        format: 'pdf'
       });
 
       if (blob) {

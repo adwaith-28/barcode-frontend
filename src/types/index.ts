@@ -54,7 +54,10 @@ export interface LabelRequest {
   data: Record<string, string>;
 }
 
-export interface PreviewLabelRequest extends LabelRequest {
+export interface PreviewLabelRequest {
+  templateId: number;
+  layoutJson?: string;
+  data: Record<string, string>;
   format?: 'pdf' | 'png';
 }
 

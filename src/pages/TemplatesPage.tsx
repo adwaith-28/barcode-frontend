@@ -16,9 +16,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Layout from '@/components/layout/Layout';
+import TemplatePreview from '@/components/TemplatePreview';
 import { useTemplateStore } from '@/stores/templateStore';
 import { useToast } from '@/components/ui/use-toast'; 
-import { TEMPLATE_CATEGORIES } from '@/types';
+import { TEMPLATE_CATEGORIES, Template } from '@/types';
 import { 
   Plus, 
   Search, 
@@ -28,7 +29,8 @@ import {
   Trash2,
   Eye,
   Calendar,
-  Grid3X3
+  Grid3X3,
+  Maximize2
 } from 'lucide-react';
 
 const TemplatesPage = () => {
@@ -49,6 +51,7 @@ const TemplatesPage = () => {
   const [searchInput, setSearchInput] = useState(filters.search);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false); 
   const [templateToDelete, setTemplateToDelete] = useState<number | null>(null);
+  const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
 
   useEffect(() => {
     fetchTemplates();
@@ -102,9 +105,14 @@ const TemplatesPage = () => {
       description: 'Simple product label with name, price, and barcode',
       category: 'Product',
       createdAt: '2024-01-15T10:30:00Z',
+      updatedAt: '2024-01-15T10:30:00Z',
       previewImage: '/api/placeholder/300/200',
       isPublic: true,
-      isActive: true
+      isActive: true,
+      layoutJson: '{"width":400,"height":300,"backgroundColor":"#ffffff","elements":[],"settings":{}}',
+      width: 400,
+      height: 300,
+      requiredFields: '[]'
     },
     {
       templateId: 2,
@@ -112,9 +120,14 @@ const TemplatesPage = () => {
       description: 'Professional shipping label with address and tracking',
       category: 'Shipping',
       createdAt: '2024-01-14T15:45:00Z',
+      updatedAt: '2024-01-14T15:45:00Z',
       previewImage: '/api/placeholder/300/200',
       isPublic: true,
-      isActive: true
+      isActive: true,
+      layoutJson: '{"width":400,"height":300,"backgroundColor":"#ffffff","elements":[],"settings":{}}',
+      width: 400,
+      height: 300,
+      requiredFields: '[]'
     },
     {
       templateId: 3,
@@ -122,9 +135,14 @@ const TemplatesPage = () => {
       description: 'Elegant price tag for retail products with branding',
       category: 'Retail',
       createdAt: '2024-01-13T09:20:00Z',
+      updatedAt: '2024-01-13T09:20:00Z',
       previewImage: '/api/placeholder/300/200',
       isPublic: true,
-      isActive: true
+      isActive: true,
+      layoutJson: '{"width":400,"height":300,"backgroundColor":"#ffffff","elements":[],"settings":{}}',
+      width: 400,
+      height: 300,
+      requiredFields: '[]'
     },
     {
       templateId: 4,
@@ -132,9 +150,14 @@ const TemplatesPage = () => {
       description: 'Customizable event badge with QR code integration',
       category: 'Custom',
       createdAt: '2024-01-12T14:10:00Z',
+      updatedAt: '2024-01-12T14:10:00Z',
       previewImage: '/api/placeholder/300/200',
       isPublic: true,
-      isActive: true
+      isActive: true,
+      layoutJson: '{"width":400,"height":300,"backgroundColor":"#ffffff","elements":[],"settings":{}}',
+      width: 400,
+      height: 300,
+      requiredFields: '[]'
     }
   ];
 
@@ -250,13 +273,8 @@ const TemplatesPage = () => {
             {filteredTemplates.map((template) => (
               <Card key={template.templateId} className="group hover:shadow-lg transition-all duration-300 border-border/50 hover:border-primary/20">
                 {/* Template Preview */}
-                <div className="aspect-video bg-muted rounded-t-lg overflow-hidden relative">
-                  <div className="w-full h-full bg-gradient-subtle flex items-center justify-center">
-                    <div className="text-center p-4">
-                      <Grid3X3 className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                      <p className="text-sm text-muted-foreground">Template Preview</p>
-                    </div>
-                  </div>
+                <div className="relative">
+                  <TemplatePreview template={template} />
                   
                   {/* Action Overlay */}
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-2">
@@ -269,6 +287,13 @@ const TemplatesPage = () => {
                       <Link to={`/generate/${template.templateId}`}>
                         <Eye className="h-4 w-4" />
                       </Link>
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="secondary"
+                      onClick={() => setPreviewTemplate(template)}
+                    >
+                      <Maximize2 className="h-4 w-4" />
                     </Button>
                     <Button 
                       size="sm" 
@@ -361,6 +386,30 @@ const TemplatesPage = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Preview Modal */}
+      {previewTemplate && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-4xl max-h-[90vh] w-full overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h3 className="text-lg font-semibold">{previewTemplate.name}</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setPreviewTemplate(null)}
+              >
+                ×
+              </Button>
+            </div>
+            <div className="p-4">
+              <TemplatePreview 
+                template={previewTemplate} 
+                className="w-full h-[600px]" 
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 };
