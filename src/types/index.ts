@@ -165,7 +165,7 @@ export const ELEMENT_TYPES = [
   { type: 'qrcode', label: 'QR Code', category: 'CODES & DATA' },
   { type: 'product-code', label: 'Product Code', category: 'CODES & DATA' },
   { type: 'image', label: 'Image Upload', category: 'MEDIA' },
-  { type: 'logo', label: 'Logo Placeholder', category: 'MEDIA' },
+  // { type: 'logo', label: 'Logo Placeholder', category: 'MEDIA' },
   { type: 'rectangle', label: 'Rectangle', category: 'SHAPES' },
   { type: 'line', label: 'Line/Divider', category: 'SHAPES' },
 ] as const;

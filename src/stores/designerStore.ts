@@ -8,6 +8,8 @@ interface DesignerStore {
   canvasSettings: CanvasSettings;
   isLoading: boolean;
   isDirty: boolean; // Track if template has unsaved changes
+  updateTemplateSize: (width: number, height: number) => void;
+
 
   // Canvas actions
   setCurrentTemplate: (template: TemplateLayout | null) => void;
@@ -323,4 +325,24 @@ export const useDesignerStore = create<DesignerStore>((set, get) => ({
   setIsDirty: (dirty) => {
     set({ isDirty: dirty });
   },
+
+  updateTemplateSize: (width: number, height: number) => {
+  const state = get();
+  if (!state.currentTemplate) return;
+
+  const updatedTemplate = {
+    ...state.currentTemplate,
+    width,
+    height
+  };
+
+  set({
+    currentTemplate: updatedTemplate,
+    canvasSettings: { ...state.canvasSettings, width, height },
+    isDirty: true,
+  });
+
+  get().saveToHistory();
+},
+
 }));
