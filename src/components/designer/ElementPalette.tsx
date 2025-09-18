@@ -69,7 +69,8 @@ const ElementPalette = () => {
       case 'dynamic-text':
         return {
           content: 'Dynamic Text',
-          dataField: 'ProductName',
+          tag: 'Dynamic Text',
+          dataField: `ProductName_${Math.random().toString(36).substr(2, 6)}`,
           fontSize: 14,
           fontFamily: 'Inter',
           fontWeight: 'normal',
@@ -79,15 +80,28 @@ const ElementPalette = () => {
       case 'barcode':
         return {
           data: '123456789',
-          dataField: 'Code',
+          tag: 'Barcode',
+          dataField: `Code_${Math.random().toString(36).substr(2, 6)}`,
           type: 'CODE_128',
           showText: true
         };
       case 'qrcode':
         return {
           data: 'Sample QR Data',
-          dataField: 'Code',
+          tag: 'QR Code',
+          dataField: `QRCode_${Math.random().toString(36).substr(2, 6)}`,
           errorCorrection: 'M'
+        };
+      case 'product-code':
+        return {
+          content: 'Product Code',
+          tag: 'Product Code',
+          dataField: `ProductCode_${Math.random().toString(36).substr(2, 6)}`,
+          fontSize: 14,
+          fontFamily: 'Inter',
+          fontWeight: 'normal',
+          textAlign: 'left',
+          color: '#000000'
         };
       case 'image':
         return {

@@ -24,7 +24,7 @@ export interface TemplateLayout {
 
 export interface LayoutElement {
   id: string;
-  type: 'text' | 'barcode' | 'qrcode' | 'image' | 'rectangle' | 'line' | 'logo';
+  type: 'text' | 'dynamic-text' | 'barcode' | 'qrcode' | 'product-code' | 'image' | 'rectangle' | 'line' | 'logo';
   x: number;
   y: number;
   width: number;

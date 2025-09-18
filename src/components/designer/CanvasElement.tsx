@@ -97,6 +97,23 @@ const CanvasElement: React.FC<CanvasElementProps> = ({
           </div>
         );
 
+      case 'product-code':
+        return (
+          <div
+            style={{
+              fontSize: `${element.properties.fontSize}px`,
+              fontFamily: element.properties.fontFamily,
+              fontWeight: element.properties.fontWeight,
+              textAlign: element.properties.textAlign,
+              color: element.properties.color,
+              whiteSpace: 'pre-wrap',
+              overflow: 'hidden',
+            }}
+          >
+            {element.properties.content || 'Product Code'}
+          </div>
+        );
+
       case 'image':
         return (
           <div className="flex items-center justify-center h-full border border-dashed border-gray-400 bg-gray-50">

@@ -43,11 +43,14 @@ const GeneratePage = () => {
       const templateData = await fetchTemplate(parseInt(id!));
       if (templateData) {
         setTemplate(templateData);
-        // Initialize form data with empty values for required fields
-        const requiredFields = JSON.parse(templateData.requiredFields || '[]');
+        
+        // Extract all dataField values from the template layout
+        const allDataFields = extractDataFieldsFromLayout(templateData.layoutJson);
+        
+        // Initialize form data with empty values for all data fields
         const initialData: LabelFormData = {};
-        requiredFields.forEach((field: string) => {
-          initialData[field] = '';
+        allDataFields.forEach((field) => {
+          initialData[field.dataField] = '';
         });
         setFormData(initialData);
       } else {
@@ -141,16 +144,58 @@ const GeneratePage = () => {
     }
   };
 
+  const extractDataFieldsFromLayout = (layoutJson: string): Array<{dataField: string, tag: string}> => {
+    try {
+      const layout = JSON.parse(layoutJson || '{}');
+      const fieldMap = new Map<string, string>();
+      
+      if (layout.elements && Array.isArray(layout.elements)) {
+        layout.elements.forEach((element: any) => {
+          if (element.properties && element.properties.dataField) {
+            const tag = element.properties.tag || element.properties.dataField;
+            fieldMap.set(element.properties.dataField, tag);
+          }
+        });
+      }
+      
+      // If no dataFields found, fall back to requiredFields
+      if (fieldMap.size === 0) {
+        const requiredFields = JSON.parse(template?.requiredFields || '[]');
+        requiredFields.forEach((field: string) => {
+          fieldMap.set(field, field);
+        });
+      }
+      
+      return Array.from(fieldMap.entries()).map(([dataField, tag]) => ({ dataField, tag }));
+    } catch (error) {
+      console.error('Error parsing layout JSON:', error);
+      return [];
+    }
+  };
+
   const getFieldLabel = (field: string) => {
+    // First try to find exact match in DATA_FIELDS
     const dataField = DATA_FIELDS.find(f => f.value === field);
-    return dataField ? dataField.label : field;
+    if (dataField) return dataField.label;
+    
+    // If it's a generated field with underscore, extract the base name
+    if (field.includes('_')) {
+      const baseField = field.split('_')[0];
+      const baseDataField = DATA_FIELDS.find(f => f.value === baseField);
+      if (baseDataField) {
+        return `${baseDataField.label} (${field.split('_')[1]})`;
+      }
+    }
+    
+    // Fallback to the field name itself
+    return field;
   };
 
   const isFormValid = () => {
     if (!template) return false;
-    const requiredFields = JSON.parse(template.requiredFields || '[]');
-    return requiredFields.every((field: string) => 
-      formData[field] && formData[field].toString().trim() !== ''
+    const allDataFields = extractDataFieldsFromLayout(template.layoutJson);
+    return allDataFields.every((field) => 
+      formData[field.dataField] && formData[field.dataField].toString().trim() !== ''
     );
   };
 
@@ -188,7 +233,7 @@ const GeneratePage = () => {
     );
   }
 
-  const requiredFields = JSON.parse(template.requiredFields || '[]');
+  const allDataFields = extractDataFieldsFromLayout(template.layoutJson);
 
   return (
     <Layout>
@@ -242,41 +287,41 @@ const GeneratePage = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {requiredFields.map((field: string) => (
-                  <div key={field} className="space-y-2">
-                    <Label htmlFor={field}>
-                      {getFieldLabel(field)}
+                {allDataFields.map((field) => (
+                  <div key={field.dataField} className="space-y-2">
+                    <Label htmlFor={field.dataField}>
+                      {field.tag}
                       <span className="text-destructive ml-1">*</span>
                     </Label>
                     
-                    {field === 'Description' ? (
+                    {field.tag.toLowerCase().includes('description') ? (
                       <Textarea
-                        id={field}
-                        placeholder={`Enter ${getFieldLabel(field).toLowerCase()}`}
-                        value={formData[field] || ''}
-                        onChange={(e) => handleInputChange(field, e.target.value)}
+                        id={field.dataField}
+                        placeholder={`Enter ${field.tag.toLowerCase()}`}
+                        value={formData[field.dataField] || ''}
+                        onChange={(e) => handleInputChange(field.dataField, e.target.value)}
                         rows={3}
                       />
-                    ) : field === 'Price' ? (
+                    ) : field.tag.toLowerCase().includes('price') ? (
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
                           $
                         </span>
                         <Input
-                          id={field}
+                          id={field.dataField}
                           type="text"
                           placeholder="0.00"
-                          value={formData[field] || ''}
-                          onChange={(e) => handleInputChange(field, e.target.value)}
+                          value={formData[field.dataField] || ''}
+                          onChange={(e) => handleInputChange(field.dataField, e.target.value)}
                           className="pl-8"
                         />
                       </div>
                     ) : (
                       <Input
-                        id={field}
-                        placeholder={`Enter ${getFieldLabel(field).toLowerCase()}`}
-                        value={formData[field] || ''}
-                        onChange={(e) => handleInputChange(field, e.target.value)}
+                        id={field.dataField}
+                        placeholder={`Enter ${field.tag.toLowerCase()}`}
+                        value={formData[field.dataField] || ''}
+                        onChange={(e) => handleInputChange(field.dataField, e.target.value)}
                       />
                     )}
                   </div>

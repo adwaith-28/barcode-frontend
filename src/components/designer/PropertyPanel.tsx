@@ -117,6 +117,17 @@ const PropertyPanel = () => {
         return (
           <div className="space-y-4">
             <div>
+              <Label htmlFor="tag" className="text-xs">Element Tag</Label>
+              <Input
+                id="tag"
+                value={selectedElement.properties.tag || ''}
+                onChange={(e) => handlePropertyChange('tag', e.target.value)}
+                placeholder="e.g., Product Name"
+                className="h-8"
+              />
+            </div>
+
+            <div>
               <Label htmlFor="content" className="text-xs">Text Content</Label>
               <Input
                 id="content"
@@ -191,6 +202,17 @@ const PropertyPanel = () => {
         return (
           <div className="space-y-4">
             <div>
+              <Label htmlFor="tag" className="text-xs">Element Tag</Label>
+              <Input
+                id="tag"
+                value={selectedElement.properties.tag || ''}
+                onChange={(e) => handlePropertyChange('tag', e.target.value)}
+                placeholder="e.g., Product One Barcode"
+                className="h-8"
+              />
+            </div>
+
+            <div>
               <Label htmlFor="data" className="text-xs">Barcode Data</Label>
               <Input
                 id="data"
@@ -232,6 +254,120 @@ const PropertyPanel = () => {
                   <SelectItem value="CODE_128">CODE 128</SelectItem>
                   <SelectItem value="CODE_39">CODE 39</SelectItem>
                   <SelectItem value="EAN_13">EAN 13</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Separator />
+            {commonProperties}
+          </div>
+        );
+
+      case 'qrcode':
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="tag" className="text-xs">Element Tag</Label>
+              <Input
+                id="tag"
+                value={selectedElement.properties.tag || ''}
+                onChange={(e) => handlePropertyChange('tag', e.target.value)}
+                placeholder="e.g., Product One QR Code"
+                className="h-8"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="data" className="text-xs">QR Code Data</Label>
+              <Input
+                id="data"
+                value={selectedElement.properties.data || ''}
+                onChange={(e) => handlePropertyChange('data', e.target.value)}
+                className="h-8"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="dataField" className="text-xs">Data Source</Label>
+              <Select
+                value={selectedElement.properties.dataField || ''}
+                onValueChange={(value) => handlePropertyChange('dataField', value)}
+              >
+                <SelectTrigger className="h-8">
+                  <SelectValue placeholder="Select field" />
+                </SelectTrigger>
+                <SelectContent>
+                  {DATA_FIELDS.map((field) => (
+                    <SelectItem key={field.value} value={field.value}>
+                      {field.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="errorCorrection" className="text-xs">Error Correction</Label>
+              <Select
+                value={selectedElement.properties.errorCorrection || 'M'}
+                onValueChange={(value) => handlePropertyChange('errorCorrection', value)}
+              >
+                <SelectTrigger className="h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="L">L (Low)</SelectItem>
+                  <SelectItem value="M">M (Medium)</SelectItem>
+                  <SelectItem value="Q">Q (Quartile)</SelectItem>
+                  <SelectItem value="H">H (High)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Separator />
+            {commonProperties}
+          </div>
+        );
+
+      case 'product-code':
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="tag" className="text-xs">Element Tag</Label>
+              <Input
+                id="tag"
+                value={selectedElement.properties.tag || ''}
+                onChange={(e) => handlePropertyChange('tag', e.target.value)}
+                placeholder="e.g., Product One Code"
+                className="h-8"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="content" className="text-xs">Product Code Text</Label>
+              <Input
+                id="content"
+                value={selectedElement.properties.content || ''}
+                onChange={(e) => handlePropertyChange('content', e.target.value)}
+                className="h-8"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="dataField" className="text-xs">Data Source</Label>
+              <Select
+                value={selectedElement.properties.dataField || ''}
+                onValueChange={(value) => handlePropertyChange('dataField', value)}
+              >
+                <SelectTrigger className="h-8">
+                  <SelectValue placeholder="Select field" />
+                </SelectTrigger>
+                <SelectContent>
+                  {DATA_FIELDS.map((field) => (
+                    <SelectItem key={field.value} value={field.value}>
+                      {field.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
