@@ -12,6 +12,7 @@ import { Settings, Layers, Type, Palette } from 'lucide-react';
 const PropertyPanel = () => {
   const {
     updateTemplateSize,
+    updateTemplateBackground,
     currentTemplate,
     selectedElements,
     updateElement,
@@ -415,6 +416,35 @@ const PropertyPanel = () => {
           </div>
         );
 
+      case 'dynamic-image':
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="tag" className="text-xs">Element Tag</Label>
+              <Input
+                id="tag"
+                value={selectedElement.properties.tag || ''}
+                onChange={(e) => handlePropertyChange('tag', e.target.value)}
+                placeholder="e.g., Product Image"
+                className="h-8"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="alt" className="text-xs">Alt Text</Label>
+              <Input
+                id="alt"
+                value={selectedElement.properties.alt || ''}
+                onChange={(e) => handlePropertyChange('alt', e.target.value)}
+                className="h-8"
+              />
+            </div>
+
+            <Separator />
+            {commonProperties}
+          </div>
+        );
+
 case 'logo':
   return (
     <div className="space-y-4">
@@ -592,10 +622,7 @@ case 'logo':
         type="color"
         value={currentTemplate.backgroundColor || '#ffffff'}
         onChange={(e) => {
-          // Update background color in template
-          updateElement("background", {
-            style: { backgroundColor: e.target.value }
-          });
+          updateTemplateBackground(e.target.value);
         }}
         className="h-8"
       />

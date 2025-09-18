@@ -25,7 +25,6 @@ import {
   Search, 
   Filter,
   Edit,
-  Copy,
   Trash2,
   Eye,
   Calendar,
@@ -43,8 +42,7 @@ const TemplatesPage = () => {
     fetchTemplates,
     setCategory,
     setSearch,
-    deleteTemplate,
-    duplicateTemplate
+    deleteTemplate
   } = useTemplateStore();
 
   const { toast } = useToast(); 
@@ -93,9 +91,6 @@ const TemplatesPage = () => {
     setTemplateToDelete(null);
   };
 
-  const handleDuplicateTemplate = async (id: number) => {
-    await duplicateTemplate(id);
-  };
 
   // Mock template data for demo purposes
   const mockTemplates = [
@@ -294,13 +289,6 @@ const TemplatesPage = () => {
                       onClick={() => setPreviewTemplate(template)}
                     >
                       <Maximize2 className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="secondary"
-                      onClick={() => handleDuplicateTemplate(template.templateId)}
-                    >
-                      <Copy className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>

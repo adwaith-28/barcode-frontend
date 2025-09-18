@@ -28,6 +28,7 @@ const ElementPalette = () => {
       case 'qrcode':
         return QrCode;
       case 'image':
+      case 'dynamic-image':
       case 'logo':
         return Image;
       case 'rectangle':
@@ -107,6 +108,12 @@ const ElementPalette = () => {
         return {
           src: '',
           alt: 'Image',
+          maintainAspectRatio: true
+        };
+      case 'dynamic-image':
+        return {
+          tag: 'Dynamic Image',
+          alt: 'Dynamic Image',
           maintainAspectRatio: true
         };
       case 'rectangle':
@@ -199,26 +206,6 @@ const ElementPalette = () => {
         ))}
       </div>
 
-      {/* Canvas Controls */}
-      <div className="p-4 border-t border-border">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Canvas</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0 space-y-3">
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div>
-                <label className="text-muted-foreground">Width</label>
-                <div className="font-medium">400px</div>
-              </div>
-              <div>
-                <label className="text-muted-foreground">Height</label>
-                <div className="font-medium">300px</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 };

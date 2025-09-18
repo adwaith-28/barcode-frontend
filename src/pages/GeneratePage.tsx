@@ -13,7 +13,6 @@ import { apiService } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Download, 
-  Eye, 
   RefreshCw, 
   ArrowLeft,
   FileText,
@@ -27,7 +26,6 @@ const GeneratePage = () => {
   
   const [template, setTemplate] = useState<Template | null>(null);
   const [formData, setFormData] = useState<LabelFormData>({});
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -76,35 +74,8 @@ const GeneratePage = () => {
       ...prev,
       [field]: value
     }));
-    // Generate preview automatically when data changes
-    if (template) {
-      generatePreview();
-    }
   };
 
-  const generatePreview = async () => {
-    if (!template || !id) return;
-
-    try {
-      const blob = await apiService.previewLabel({
-        templateId: parseInt(id),
-        layoutJson: template.layoutJson,
-        data: formData,
-        format: 'pdf'
-      });
-
-      if (blob) {
-        // Revoke previous preview URL to prevent memory leaks
-        if (previewUrl) {
-          URL.revokeObjectURL(previewUrl);
-        }
-        const url = URL.createObjectURL(blob);
-        setPreviewUrl(url);
-      }
-    } catch (error) {
-      console.error('Preview generation failed:', error);
-    }
-  };
 
   const handleGenerateLabel = async () => {
     if (!template || !id) return;
@@ -155,6 +126,10 @@ const GeneratePage = () => {
           if (element.properties && element.properties.dataField) {
             const tag = element.properties.tag || element.properties.dataField;
             fieldMap.set(element.properties.dataField, tag);
+          } else if (element.type === 'dynamic-image') {
+            // For dynamic-image elements, create a field based on the element ID
+            const tag = element.properties.tag || 'Dynamic Image';
+            fieldMap.set(element.id, tag);
           }
         });
       }
@@ -274,147 +249,106 @@ const GeneratePage = () => {
           </Button>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
+        <div className="max-w-2xl mx-auto">
           {/* Data Input Form */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <FileText className="h-5 w-5 mr-2" />
-                  Label Data
-                </CardTitle>
-                <CardDescription>
-                  Fill in the information that will appear on your label
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {allDataFields.map((field) => (
-                  <div key={field.dataField} className="space-y-2">
-                    <Label htmlFor={field.dataField}>
-                      {field.tag}
-                      <span className="text-destructive ml-1">*</span>
-                    </Label>
-                    
-                    {field.tag.toLowerCase().includes('description') ? (
-                      <Textarea
-                        id={field.dataField}
-                        placeholder={`Enter ${field.tag.toLowerCase()}`}
-                        value={formData[field.dataField] || ''}
-                        onChange={(e) => handleInputChange(field.dataField, e.target.value)}
-                        rows={3}
-                      />
-                    ) : field.tag.toLowerCase().includes('price') ? (
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
-                          $
-                        </span>
-                        <Input
-                          id={field.dataField}
-                          type="text"
-                          placeholder="0.00"
-                          value={formData[field.dataField] || ''}
-                          onChange={(e) => handleInputChange(field.dataField, e.target.value)}
-                          className="pl-8"
-                        />
-                      </div>
-                    ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <FileText className="h-5 w-5 mr-2" />
+                Label Data
+              </CardTitle>
+              <CardDescription>
+                Fill in the information that will appear on your label
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {allDataFields.map((field) => (
+                <div key={field.dataField} className="space-y-2">
+                  <Label htmlFor={field.dataField}>
+                    {field.tag}
+                    <span className="text-destructive ml-1">*</span>
+                  </Label>
+                  
+                  {field.tag.toLowerCase().includes('description') ? (
+                    <Textarea
+                      id={field.dataField}
+                      placeholder={`Enter ${field.tag.toLowerCase()}`}
+                      value={formData[field.dataField] || ''}
+                      onChange={(e) => handleInputChange(field.dataField, e.target.value)}
+                      rows={3}
+                    />
+                  ) : field.tag.toLowerCase().includes('price') ? (
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
+                        $
+                      </span>
                       <Input
                         id={field.dataField}
-                        placeholder={`Enter ${field.tag.toLowerCase()}`}
+                        type="text"
+                        placeholder="0.00"
                         value={formData[field.dataField] || ''}
                         onChange={(e) => handleInputChange(field.dataField, e.target.value)}
+                        className="pl-8"
                       />
-                    )}
-                  </div>
-                ))}
-
-                <div className="flex space-x-2 pt-4">
-                  <Button
-                    variant="outline"
-                    onClick={() => setFormData({})}
-                    className="flex-1"
-                  >
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Clear
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={generatePreview}
-                    className="flex-1"
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    Preview
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Live Preview */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Eye className="h-5 w-5 mr-2" />
-                  Live Preview
-                </CardTitle>
-                <CardDescription>
-                  See how your label will look as you type
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="aspect-video bg-muted rounded-lg flex items-center justify-center min-h-[300px]">
-                  {previewUrl ? (
-                    <img
-                      src={previewUrl}
-                      alt="Label preview"
-                      className="max-w-full max-h-full object-contain rounded"
+                    </div>
+                  ) : field.tag.toLowerCase().includes('image') ? (
+                    <Input
+                      id={field.dataField}
+                      type="file"
+                      accept="image/*"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            handleInputChange(field.dataField, reader.result as string);
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
                     />
                   ) : (
-                    <div className="text-center text-muted-foreground">
-                      <Eye className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p>Fill in the form to see a preview</p>
-                      <p className="text-sm mt-2">
-                        Changes will update automatically
-                      </p>
-                    </div>
+                    <Input
+                      id={field.dataField}
+                      placeholder={`Enter ${field.tag.toLowerCase()}`}
+                      value={formData[field.dataField] || ''}
+                      onChange={(e) => handleInputChange(field.dataField, e.target.value)}
+                    />
                   )}
                 </div>
+              ))}
 
-                {previewUrl && (
-                  <div className="mt-4 text-center">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={generatePreview}
-                    >
-                      <RefreshCw className="h-4 w-4 mr-2" />
-                      Refresh Preview
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+              <div className="flex space-x-2 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setFormData({})}
+                  className="flex-1"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Clear
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
 
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Need to make changes?</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button variant="outline" className="w-full" asChild>
-                  <Link to={`/designer/${template.templateId}`}>
-                    Edit Template
-                  </Link>
-                </Button>
-                <Button variant="outline" className="w-full" asChild>
-                  <Link to="/templates">
-                    Choose Different Template
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Quick Actions */}
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle>Need to make changes?</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button variant="outline" className="w-full" asChild>
+                <Link to={`/designer/${template.templateId}`}>
+                  Edit Template
+                </Link>
+              </Button>
+              <Button variant="outline" className="w-full" asChild>
+                <Link to="/templates">
+                  Choose Different Template
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </Layout>

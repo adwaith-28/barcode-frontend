@@ -16,8 +16,10 @@ const CanvasElement: React.FC<CanvasElementProps> = ({
   zoom
 }) => {
   const [isDragging, setIsDragging] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [elementStart, setElementStart] = useState({ x: 0, y: 0 });
+  const [elementStart, setElementStart] = useState({ x: 0, y: 0, width: 0, height: 0 });
+  const [resizeHandle, setResizeHandle] = useState<string | null>(null);
   
   const { updateElement } = useDesignerStore();
 
@@ -32,27 +34,95 @@ const CanvasElement: React.FC<CanvasElementProps> = ({
 
     setIsDragging(true);
     setDragStart({ x: e.clientX, y: e.clientY });
-    setElementStart({ x: element.x, y: element.y });
+    setElementStart({ x: element.x, y: element.y, width: element.width, height: element.height });
+  };
+
+  const handleResizeMouseDown = (e: React.MouseEvent, handle: string) => {
+    e.stopPropagation();
+    setIsResizing(true);
+    setResizeHandle(handle);
+    setDragStart({ x: e.clientX, y: e.clientY });
+    setElementStart({ x: element.x, y: element.y, width: element.width, height: element.height });
   };
 
   const handleMouseMove = (e: MouseEvent) => {
-    if (!isDragging) return;
+    if (isDragging) {
+      const deltaX = (e.clientX - dragStart.x) / zoom;
+      const deltaY = (e.clientY - dragStart.y) / zoom;
 
-    const deltaX = (e.clientX - dragStart.x) / zoom;
-    const deltaY = (e.clientY - dragStart.y) / zoom;
+      updateElement(element.id, {
+        x: Math.max(0, elementStart.x + deltaX),
+        y: Math.max(0, elementStart.y + deltaY),
+      });
+    } else if (isResizing && resizeHandle) {
+      const deltaX = (e.clientX - dragStart.x) / zoom;
+      const deltaY = (e.clientY - dragStart.y) / zoom;
 
-    updateElement(element.id, {
-      x: Math.max(0, elementStart.x + deltaX),
-      y: Math.max(0, elementStart.y + deltaY),
-    });
+      let newX = elementStart.x;
+      let newY = elementStart.y;
+      let newWidth = elementStart.width;
+      let newHeight = elementStart.height;
+
+      switch (resizeHandle) {
+        case 'nw':
+          newX = elementStart.x + deltaX;
+          newY = elementStart.y + deltaY;
+          newWidth = elementStart.width - deltaX;
+          newHeight = elementStart.height - deltaY;
+          break;
+        case 'ne':
+          newY = elementStart.y + deltaY;
+          newWidth = elementStart.width + deltaX;
+          newHeight = elementStart.height - deltaY;
+          break;
+        case 'sw':
+          newX = elementStart.x + deltaX;
+          newWidth = elementStart.width - deltaX;
+          newHeight = elementStart.height + deltaY;
+          break;
+        case 'se':
+          newWidth = elementStart.width + deltaX;
+          newHeight = elementStart.height + deltaY;
+          break;
+        case 'n':
+          newY = elementStart.y + deltaY;
+          newHeight = elementStart.height - deltaY;
+          break;
+        case 's':
+          newHeight = elementStart.height + deltaY;
+          break;
+        case 'w':
+          newX = elementStart.x + deltaX;
+          newWidth = elementStart.width - deltaX;
+          break;
+        case 'e':
+          newWidth = elementStart.width + deltaX;
+          break;
+      }
+
+      // Ensure minimum size
+      newWidth = Math.max(10, newWidth);
+      newHeight = Math.max(10, newHeight);
+      newX = Math.max(0, newX);
+      newY = Math.max(0, newY);
+
+      updateElement(element.id, {
+        x: newX,
+        y: newY,
+        width: newWidth,
+        height: newHeight,
+      });
+    }
   };
 
   const handleMouseUp = () => {
     setIsDragging(false);
+    setIsResizing(false);
+    setResizeHandle(null);
   };
 
   React.useEffect(() => {
-    if (isDragging) {
+    if (isDragging || isResizing) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
       
@@ -61,7 +131,7 @@ const CanvasElement: React.FC<CanvasElementProps> = ({
         document.removeEventListener('mouseup', handleMouseUp);
       };
     }
-  }, [isDragging, dragStart, elementStart, zoom]);
+  }, [isDragging, isResizing, dragStart, elementStart, zoom, resizeHandle]);
 
   const renderElement = () => {
     switch (element.type) {
@@ -115,9 +185,38 @@ const CanvasElement: React.FC<CanvasElementProps> = ({
         );
 
       case 'image':
+        const imageSrc = element.properties.src || element.properties.imageData;
+        if (imageSrc && typeof imageSrc === 'string') {
+          try {
+            // Handle base64 data URLs
+            const src = imageSrc.includes(',') ? imageSrc : `data:image/png;base64,${imageSrc}`;
+            return (
+              <img
+                src={src}
+                alt="Uploaded image"
+                className="w-full h-full object-contain"
+                style={{ maxWidth: '100%', maxHeight: '100%' }}
+              />
+            );
+          } catch (error) {
+            console.error('Error rendering image:', error);
+            return (
+              <div className="flex items-center justify-center h-full border border-dashed border-gray-400 bg-gray-50">
+                <div className="text-xs text-gray-600">IMAGE ERROR</div>
+              </div>
+            );
+          }
+        }
         return (
           <div className="flex items-center justify-center h-full border border-dashed border-gray-400 bg-gray-50">
             <div className="text-xs text-gray-600">IMAGE</div>
+          </div>
+        );
+
+      case 'dynamic-image':
+        return (
+          <div className="flex items-center justify-center h-full border border-dashed border-blue-400 bg-blue-50">
+            <div className="text-xs text-blue-600">DYNAMIC IMAGE</div>
           </div>
         );
 
@@ -173,16 +272,40 @@ const CanvasElement: React.FC<CanvasElementProps> = ({
       {isSelected && (
         <>
           {/* Corner handles */}
-          <div className="absolute -top-1 -left-1 w-2 h-2 bg-canvas-handle border border-white rounded-sm cursor-nw-resize" />
-          <div className="absolute -top-1 -right-1 w-2 h-2 bg-canvas-handle border border-white rounded-sm cursor-ne-resize" />
-          <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-canvas-handle border border-white rounded-sm cursor-sw-resize" />
-          <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-canvas-handle border border-white rounded-sm cursor-se-resize" />
+          <div 
+            className="absolute -top-1 -left-1 w-2 h-2 bg-canvas-handle border border-white rounded-sm cursor-nw-resize" 
+            onMouseDown={(e) => handleResizeMouseDown(e, 'nw')}
+          />
+          <div 
+            className="absolute -top-1 -right-1 w-2 h-2 bg-canvas-handle border border-white rounded-sm cursor-ne-resize" 
+            onMouseDown={(e) => handleResizeMouseDown(e, 'ne')}
+          />
+          <div 
+            className="absolute -bottom-1 -left-1 w-2 h-2 bg-canvas-handle border border-white rounded-sm cursor-sw-resize" 
+            onMouseDown={(e) => handleResizeMouseDown(e, 'sw')}
+          />
+          <div 
+            className="absolute -bottom-1 -right-1 w-2 h-2 bg-canvas-handle border border-white rounded-sm cursor-se-resize" 
+            onMouseDown={(e) => handleResizeMouseDown(e, 'se')}
+          />
           
           {/* Edge handles */}
-          <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-canvas-handle border border-white rounded-sm cursor-n-resize" />
-          <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-canvas-handle border border-white rounded-sm cursor-s-resize" />
-          <div className="absolute -left-1 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-canvas-handle border border-white rounded-sm cursor-w-resize" />
-          <div className="absolute -right-1 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-canvas-handle border border-white rounded-sm cursor-e-resize" />
+          <div 
+            className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-canvas-handle border border-white rounded-sm cursor-n-resize" 
+            onMouseDown={(e) => handleResizeMouseDown(e, 'n')}
+          />
+          <div 
+            className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-canvas-handle border border-white rounded-sm cursor-s-resize" 
+            onMouseDown={(e) => handleResizeMouseDown(e, 's')}
+          />
+          <div 
+            className="absolute -left-1 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-canvas-handle border border-white rounded-sm cursor-w-resize" 
+            onMouseDown={(e) => handleResizeMouseDown(e, 'w')}
+          />
+          <div 
+            className="absolute -right-1 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-canvas-handle border border-white rounded-sm cursor-e-resize" 
+            onMouseDown={(e) => handleResizeMouseDown(e, 'e')}
+          />
         </>
       )}
     </div>

@@ -24,7 +24,7 @@ export interface TemplateLayout {
 
 export interface LayoutElement {
   id: string;
-  type: 'text' | 'dynamic-text' | 'barcode' | 'qrcode' | 'product-code' | 'image' | 'rectangle' | 'line' | 'logo';
+  type: 'text' | 'dynamic-text' | 'barcode' | 'qrcode' | 'product-code' | 'image' | 'dynamic-image' | 'rectangle' | 'line' | 'logo';
   x: number;
   y: number;
   width: number;
@@ -168,6 +168,7 @@ export const ELEMENT_TYPES = [
   { type: 'qrcode', label: 'QR Code', category: 'CODES & DATA' },
   { type: 'product-code', label: 'Product Code', category: 'CODES & DATA' },
   { type: 'image', label: 'Image Upload', category: 'MEDIA' },
+  { type: 'dynamic-image', label: 'Dynamic Image', category: 'MEDIA' },
   // { type: 'logo', label: 'Logo Placeholder', category: 'MEDIA' },
   { type: 'rectangle', label: 'Rectangle', category: 'SHAPES' },
   { type: 'line', label: 'Line/Divider', category: 'SHAPES' },
@@ -178,7 +179,6 @@ export const CANVAS_PRESETS = [
   { name: 'Business Card', width: 350, height: 200 },
   { name: 'Product Label', width: 400, height: 300 },
   { name: 'Shipping Label', width: 600, height: 400 },
-  { name: 'Custom', width: 400, height: 300 },
 ] as const;
 
 // Data field options

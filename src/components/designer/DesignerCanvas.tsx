@@ -77,8 +77,8 @@ const DesignerCanvas = () => {
   }
 
   const canvasStyle = {
-    width: `${canvasSettings.width * canvasSettings.zoom}px`,
-    height: `${canvasSettings.height * canvasSettings.zoom}px`,
+    width: `${currentTemplate.width}px`,
+    height: `${currentTemplate.height}px`,
     transform: `scale(${canvasSettings.zoom})`,
     transformOrigin: 'top left',
   };
@@ -142,10 +142,10 @@ const DesignerCanvas = () => {
           <div className="w-8 h-8 bg-card border-r border-b border-border" />
           <div 
             className="h-8 bg-card border-b border-border flex relative"
-            style={{ width: `${canvasSettings.width * canvasSettings.zoom}px` }}
+            style={{ width: `${currentTemplate.width * canvasSettings.zoom}px` }}
           >
             {/* Ruler markings would go here */}
-            {Array.from({ length: Math.floor(canvasSettings.width / 50) + 1 }, (_, i) => (
+            {Array.from({ length: Math.floor(currentTemplate.width / 50) + 1 }, (_, i) => (
               <div
                 key={i}
                 className="absolute border-l border-border/50 h-full"
@@ -163,10 +163,10 @@ const DesignerCanvas = () => {
           {/* Left Ruler */}
           <div 
             className="w-8 bg-card border-r border-border flex flex-col relative"
-            style={{ height: `${canvasSettings.height * canvasSettings.zoom}px` }}
+            style={{ height: `${currentTemplate.height * canvasSettings.zoom}px` }}
           >
             {/* Ruler markings would go here */}
-            {Array.from({ length: Math.floor(canvasSettings.height / 50) + 1 }, (_, i) => (
+            {Array.from({ length: Math.floor(currentTemplate.height / 50) + 1 }, (_, i) => (
               <div
                 key={i}
                 className="absolute border-t border-border/50 w-full"

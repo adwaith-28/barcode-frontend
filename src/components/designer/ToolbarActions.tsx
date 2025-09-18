@@ -16,8 +16,6 @@ import {
   Save, 
   Undo, 
   Redo, 
-  Eye, 
-  Download,
   Copy,
   Trash2,
   Grid3X3,
@@ -270,18 +268,8 @@ const ToolbarActions: React.FC<ToolbarActionsProps> = ({ templateId }) => {
         </Button>
       </div>
 
-      {/* Right Section - Save & Preview */}
+      {/* Right Section - Save */}
       <div className="flex items-center space-x-2">
-        <Button variant="outline" size="sm">
-          <Eye className="h-4 w-4 mr-2" />
-          Preview
-        </Button>
-        
-        <Button variant="outline" size="sm">
-          <Download className="h-4 w-4 mr-2" />
-          Export
-        </Button>
-        
         <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
           <DialogTrigger asChild>
             <Button 
