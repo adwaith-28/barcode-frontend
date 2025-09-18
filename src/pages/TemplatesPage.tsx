@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'; 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,6 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Layout from '@/components/layout/Layout';
 import { useTemplateStore } from '@/stores/templateStore';
+import { useToast } from '@/components/ui/use-toast'; 
 import { TEMPLATE_CATEGORIES } from '@/types';
 import { 
   Plus, 
@@ -34,7 +45,10 @@ const TemplatesPage = () => {
     duplicateTemplate
   } = useTemplateStore();
 
+  const { toast } = useToast(); 
   const [searchInput, setSearchInput] = useState(filters.search);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false); 
+  const [templateToDelete, setTemplateToDelete] = useState<number | null>(null);
 
   useEffect(() => {
     fetchTemplates();
@@ -49,10 +63,31 @@ const TemplatesPage = () => {
     return () => clearTimeout(timer);
   };
 
-  const handleDeleteTemplate = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this template?')) {
-      await deleteTemplate(id);
+ const openDeleteDialog = (id: number) => {
+    setTemplateToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteTemplate = async () => {
+    if (!templateToDelete) return;
+    
+    const result = await deleteTemplate(templateToDelete);
+    
+    if (result) {
+      toast({
+        title: "Success",
+        description: "Template deleted successfully!",
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to delete template",
+        variant: "destructive",
+      });
     }
+    
+    setDeleteDialogOpen(false);
+    setTemplateToDelete(null);
   };
 
   const handleDuplicateTemplate = async (id: number) => {
@@ -281,7 +316,7 @@ const TemplatesPage = () => {
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => handleDeleteTemplate(template.templateId)}
+                      onClick={() => openDeleteDialog(template.templateId)}
                       className="text-destructive hover:text-destructive"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -305,6 +340,27 @@ const TemplatesPage = () => {
           </div>
         )}
       </div>
+            {/* Add this AlertDialog at the bottom */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the template
+              and remove it from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteTemplate}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Layout>
   );
 };
