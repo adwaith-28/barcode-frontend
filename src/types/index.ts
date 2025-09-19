@@ -166,7 +166,7 @@ export const ELEMENT_TYPES = [
   { type: 'dynamic-text', label: 'Dynamic Text', category: 'TEXT ELEMENTS' },
   { type: 'barcode', label: 'Barcode', category: 'CODES & DATA' },
   { type: 'qrcode', label: 'QR Code', category: 'CODES & DATA' },
-  { type: 'product-code', label: 'Product Code', category: 'CODES & DATA' },
+  // { type: 'product-code', label: 'Product Code', category: 'CODES & DATA' },
   { type: 'image', label: 'Image Upload', category: 'MEDIA' },
   { type: 'dynamic-image', label: 'Dynamic Image', category: 'MEDIA' },
   // { type: 'logo', label: 'Logo Placeholder', category: 'MEDIA' },

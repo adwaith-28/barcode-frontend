@@ -117,7 +117,7 @@ const PropertyPanel = () => {
       case 'text':
         return (
           <div className="space-y-4">
-            <div>
+            {/* <div>
               <Label htmlFor="tag" className="text-xs">Element Tag</Label>
               <Input
                 id="tag"
@@ -126,7 +126,7 @@ const PropertyPanel = () => {
                 placeholder="e.g., Product Name"
                 className="h-8"
               />
-            </div>
+            </div> */}
 
             <div>
               <Label htmlFor="content" className="text-xs">Text Content</Label>
@@ -137,6 +137,92 @@ const PropertyPanel = () => {
                 className="h-8"
               />
             </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label htmlFor="fontSize" className="text-xs">Font Size</Label>
+                <Input
+                  id="fontSize"
+                  type="number"
+                  value={selectedElement.properties.fontSize || 14}
+                  onChange={(e) => handlePropertyChange('fontSize', parseInt(e.target.value) || 14)}
+                  className="h-8"
+                />
+              </div>
+              <div>
+                <Label htmlFor="fontWeight" className="text-xs">Weight</Label>
+                <Select
+                  value={selectedElement.properties.fontWeight || 'normal'}
+                  onValueChange={(value) => handlePropertyChange('fontWeight', value)}
+                >
+                  <SelectTrigger className="h-8">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="normal">Normal</SelectItem>
+                    <SelectItem value="bold">Bold</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="textAlign" className="text-xs">Text Align</Label>
+              <Select
+                value={selectedElement.properties.textAlign || 'left'}
+                onValueChange={(value) => handlePropertyChange('textAlign', value)}
+              >
+                <SelectTrigger className="h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="left">Left</SelectItem>
+                  <SelectItem value="center">Center</SelectItem>
+                  <SelectItem value="right">Right</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="color" className="text-xs">Color</Label>
+              <Input
+                id="color"
+                type="color"
+                value={selectedElement.properties.color || '#000000'}
+                onChange={(e) => handlePropertyChange('color', e.target.value)}
+                className="h-8"
+              />
+            </div>
+
+            <Separator />
+            {commonProperties}
+          </div>
+        );
+
+      case 'dynamic-text':
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="tag" className="text-xs">Element Tag</Label>
+              <Input
+                id="tag"
+                value={selectedElement.properties.tag || ''}
+                onChange={(e) => handlePropertyChange('tag', e.target.value)}
+                placeholder="e.g., Dynamic Text 1"
+                className="h-8"
+              />
+            </div>
+
+            {/* <div>
+              <Label htmlFor="dataField" className="text-xs">Data Field Key</Label>
+              <Input
+                id="dataField"
+                value={selectedElement.properties.dataField || ''}
+                onChange={(e) => handlePropertyChange('dataField', e.target.value)}
+                placeholder="e.g., DynamicText_ABC123"
+                className="h-8"
+              />
+            </div> */}
 
             <div className="grid grid-cols-2 gap-2">
               <div>
@@ -213,7 +299,7 @@ const PropertyPanel = () => {
               />
             </div>
 
-            <div>
+            {/* <div>
               <Label htmlFor="data" className="text-xs">Barcode Data</Label>
               <Input
                 id="data"
@@ -221,9 +307,9 @@ const PropertyPanel = () => {
                 onChange={(e) => handlePropertyChange('data', e.target.value)}
                 className="h-8"
               />
-            </div>
+            </div> */}
 
-            <div>
+            {/* <div>
               <Label htmlFor="dataField" className="text-xs">Data Source</Label>
               <Select
                 value={selectedElement.properties.dataField || ''}
@@ -240,7 +326,7 @@ const PropertyPanel = () => {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+            </div> */}
 
             <div>
               <Label htmlFor="barcodeType" className="text-xs">Barcode Type</Label>
@@ -278,7 +364,7 @@ const PropertyPanel = () => {
               />
             </div>
 
-            <div>
+            {/* <div>
               <Label htmlFor="data" className="text-xs">QR Code Data</Label>
               <Input
                 id="data"
@@ -286,9 +372,9 @@ const PropertyPanel = () => {
                 onChange={(e) => handlePropertyChange('data', e.target.value)}
                 className="h-8"
               />
-            </div>
+            </div> */}
 
-            <div>
+            {/* <div>
               <Label htmlFor="dataField" className="text-xs">Data Source</Label>
               <Select
                 value={selectedElement.properties.dataField || ''}
@@ -305,7 +391,7 @@ const PropertyPanel = () => {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+            </div> */}
 
             <div>
               <Label htmlFor="errorCorrection" className="text-xs">Error Correction</Label>
@@ -401,7 +487,7 @@ const PropertyPanel = () => {
               />
             </div>
 
-            <div>
+            {/* <div>
               <Label htmlFor="alt" className="text-xs">Alt Text</Label>
               <Input
                 id="alt"
@@ -409,7 +495,7 @@ const PropertyPanel = () => {
                 onChange={(e) => handlePropertyChange('alt', e.target.value)}
                 className="h-8"
               />
-            </div>
+            </div> */}
 
             <Separator />
             {commonProperties}
@@ -430,7 +516,7 @@ const PropertyPanel = () => {
               />
             </div>
 
-            <div>
+            {/* <div>
               <Label htmlFor="alt" className="text-xs">Alt Text</Label>
               <Input
                 id="alt"
@@ -438,7 +524,7 @@ const PropertyPanel = () => {
                 onChange={(e) => handlePropertyChange('alt', e.target.value)}
                 className="h-8"
               />
-            </div>
+            </div> */}
 
             <Separator />
             {commonProperties}
