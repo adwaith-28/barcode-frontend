@@ -164,12 +164,24 @@ const TemplatesPage = () => {
     return matchesCategory && matchesSearch;
   });
 
+  const parseApiDate = (dateString: string) => {
+    if (!dateString) return new Date(NaN);
+    const hasTimezone = /[zZ]$|[+-]\d{2}:?\d{2}$/.test(dateString);
+    const normalized = hasTimezone ? dateString : `${dateString}Z`;
+    return new Date(normalized);
+  };
+
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+    const date = parseApiDate(dateString);
     const now = new Date();
-    const diffTime = Math.abs(now.getTime() - date.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+    const diffMs = Math.max(0, now.getTime() - date.getTime());
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffMinutes < 1) return 'Just now';
+    if (diffMinutes < 60) return `${diffMinutes} min ago`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
     if (diffDays === 1) return 'Yesterday';
     if (diffDays < 7) return `${diffDays} days ago`;
     return date.toLocaleDateString();
@@ -311,7 +323,7 @@ const TemplatesPage = () => {
                   <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
                     <div className="flex items-center">
                       <Calendar className="h-3 w-3 mr-1" />
-                      {formatDate(template.createdAt)}
+                      {formatDate(template.updatedAt)}
                     </div>
                   </div>
 
