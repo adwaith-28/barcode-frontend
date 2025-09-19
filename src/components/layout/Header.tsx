@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Palette, Home, File, Library, Plus } from 'lucide-react';
+import { Target, Home, File, Library, Plus } from 'lucide-react';
 
 const Header = () => {
   const location = useLocation();
@@ -15,10 +15,10 @@ const Header = () => {
       <div className="container flex h-16 items-center justify-between">
         {/* Logo & Brand */}
         <Link to="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-          <div className="w-8 h-8 bg-gradient-primary rounded-md flex items-center justify-center">
-            <Palette className="h-5 w-5 text-primary-foreground" />
+          <div className="w-8 h-8 bg-blue-600 rounded-md flex items-center justify-center">
+            <Target className="h-5 w-5 text-white" />
           </div>
-          <span className="font-bold text-xl text-foreground">CloudLabel</span>
+          <span className="font-bold text-xl text-foreground">SOTI Trace</span>
         </Link>
 
         {/* Navigation */}
@@ -75,7 +75,7 @@ const Header = () => {
             variant="default"
             size="sm"
             asChild
-            className="bg-gradient-primary hover:opacity-90 border-0"
+            className="bg-blue-600 hover:bg-blue-700 border-0"
           >
             <Link to="/templates">
               Get Started

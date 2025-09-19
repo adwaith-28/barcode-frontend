@@ -69,7 +69,7 @@ const DesignerCanvas = () => {
       <div className="flex-1 flex items-center justify-center bg-canvas-bg">
         <div className="text-center text-muted-foreground">
           <Move className="h-12 w-12 mx-auto mb-4 opacity-50" />
-          <h3 className="text-lg font-medium mb-2">Welcome to CloudLabel Designer</h3>
+          <h3 className="text-lg font-medium mb-2">Welcome to SOTI Trace</h3>
           <p>Start by adding elements from the palette on the left</p>
         </div>
       </div>

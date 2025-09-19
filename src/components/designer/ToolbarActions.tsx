@@ -91,7 +91,7 @@ const ToolbarActions: React.FC<ToolbarActionsProps> = ({ templateId }) => {
     try {
       const templateData = {
         name: templateInfo.name.trim(),
-        description: templateInfo.description.trim() || 'Created with CloudLabel Designer',
+        description: templateInfo.description.trim() || 'Created with SOTI Trace',
         layoutJson: JSON.stringify(currentTemplate),
         width: currentTemplate.width,
         height: currentTemplate.height,
