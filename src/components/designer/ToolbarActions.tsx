@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -31,6 +31,7 @@ interface ToolbarActionsProps {
 
 const ToolbarActions: React.FC<ToolbarActionsProps> = ({ templateId }) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [templateInfo, setTemplateInfo] = useState({
@@ -124,6 +125,8 @@ const ToolbarActions: React.FC<ToolbarActionsProps> = ({ templateId }) => {
         category: 'Custom',
         isPublic: false
       });
+
+      navigate('/templates'); 
     } catch (error) {
       toast({
         title: "Save failed",
@@ -133,6 +136,7 @@ const ToolbarActions: React.FC<ToolbarActionsProps> = ({ templateId }) => {
     } finally {
       setIsSaving(false);
     }
+          
   };
 
   // Prefill template info when editing
