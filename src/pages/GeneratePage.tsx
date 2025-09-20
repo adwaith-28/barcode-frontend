@@ -1,22 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Layout from '@/components/layout/Layout';
+import TemplatePreviewCanvas from '@/components/TemplatePreviewCanvas';
+import DynamicElementEditor from '@/components/DynamicElementEditor';
 import { useTemplateStore } from '@/stores/templateStore';
-import { Template, LabelFormData, DATA_FIELDS } from '@/types';
+import { Template, LabelFormData, LayoutElement } from '@/types';
 import { apiService } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Download, 
   RefreshCw, 
   ArrowLeft,
-  FileText,
-  Loader2
+  Loader2,
+  ZoomIn,
+  ZoomOut
 } from 'lucide-react';
 
 const GeneratePage = () => {
@@ -28,6 +28,8 @@ const GeneratePage = () => {
   const [formData, setFormData] = useState<LabelFormData>({});
   const [isGenerating, setIsGenerating] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [zoom, setZoom] = useState(1);
+  const [selectedElement, setSelectedElement] = useState<LayoutElement | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -74,6 +76,14 @@ const GeneratePage = () => {
       ...prev,
       [field]: value
     }));
+  };
+
+  const handleElementClick = (element: LayoutElement) => {
+    setSelectedElement(element);
+  };
+
+  const handleCloseEditor = () => {
+    setSelectedElement(null);
   };
 
 
@@ -152,23 +162,6 @@ const GeneratePage = () => {
     }
   };
 
-  const getFieldLabel = (field: string) => {
-    // First try to find exact match in DATA_FIELDS
-    const dataField = DATA_FIELDS.find(f => f.value === field);
-    if (dataField) return dataField.label;
-    
-    // If it's a generated field with underscore, extract the base name
-    if (field.includes('_')) {
-      const baseField = field.split('_')[0];
-      const baseDataField = DATA_FIELDS.find(f => f.value === baseField);
-      if (baseDataField) {
-        return `${baseDataField.label} (${field.split('_')[1]})`;
-      }
-    }
-    
-    // Fallback to the field name itself
-    return field;
-  };
 
   const isFormValid = () => {
     if (!template) return false;
@@ -252,106 +245,156 @@ const GeneratePage = () => {
           </Button>
         </div>
 
-        <div className="max-w-2xl mx-auto">
-          {/* Data Input Form */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <FileText className="h-5 w-5 mr-2" />
-                Label Data
-              </CardTitle>
-              <CardDescription>
-                Fill in the information that will appear on your label
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {allDataFields.map((field) => (
-                <div key={field.dataField} className="space-y-2">
-                  <Label htmlFor={field.dataField}>
-                    {field.tag}
-                    <span className="text-destructive ml-1">*</span>
-                  </Label>
-                  
-                  {field.tag.toLowerCase().includes('description') ? (
-                    <Textarea
-                      id={field.dataField}
-                      placeholder={`Enter ${field.tag.toLowerCase()}`}
-                      value={formData[field.dataField] || ''}
-                      onChange={(e) => handleInputChange(field.dataField, e.target.value)}
-                      rows={3}
-                    />
-                  ) : field.tag.toLowerCase().includes('price') ? (
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
-                        $
-                      </span>
-                      <Input
-                        id={field.dataField}
-                        type="text"
-                        placeholder="0.00"
-                        value={formData[field.dataField] || ''}
-                        onChange={(e) => handleInputChange(field.dataField, e.target.value)}
-                        className="pl-8"
-                      />
-                    </div>
-                  ) : field.tag.toLowerCase().includes('image') ? (
-                    <Input
-                      id={field.dataField}
-                      type="file"
-                      accept="image/*"
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            handleInputChange(field.dataField, reader.result as string);
-                          };
-                          reader.readAsDataURL(file);
-                        }
-                      }}
-                    />
-                  ) : (
-                    <Input
-                      id={field.dataField}
-                      placeholder={`Enter ${field.tag.toLowerCase()}`}
-                      value={formData[field.dataField] || ''}
-                      onChange={(e) => handleInputChange(field.dataField, e.target.value)}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Visual Preview */}
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Template Preview</CardTitle>
+                    <CardDescription>
+                      Hover over dynamic elements to add your data
+                    </CardDescription>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setZoom(Math.max(0.5, zoom - 0.25))}
+                      disabled={zoom <= 0.5}
+                    >
+                      <ZoomOut className="h-4 w-4" />
+                    </Button>
+                    <span className="text-sm font-medium min-w-[60px] text-center">
+                      {Math.round(zoom * 100)}%
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setZoom(Math.min(3, zoom + 0.25))}
+                      disabled={zoom >= 3}
+                    >
+                      <ZoomIn className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex justify-center p-4 bg-gray-50 rounded-lg">
+                  {template && (
+                    <TemplatePreviewCanvas
+                      template={JSON.parse(template.layoutJson)}
+                      formData={formData}
+                      onDataChange={handleInputChange}
+                      onElementClick={handleElementClick}
+                      selectedElementId={selectedElement?.id}
+                      zoom={zoom}
                     />
                   )}
                 </div>
-              ))}
+              </CardContent>
+            </Card>
+          </div>
 
-              <div className="flex space-x-2 pt-4">
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Dynamic Element Editor */}
+            {selectedElement ? (
+              <DynamicElementEditor
+                selectedElement={selectedElement}
+                formData={formData}
+                onDataChange={handleInputChange}
+                onClose={handleCloseEditor}
+              />
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Edit Dynamic Elements</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-sm text-muted-foreground text-center py-4">
+                    Click on any dynamic element in the preview to edit its content
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Quick Actions */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button
+                  onClick={handleGenerateLabel}
+                  disabled={!isFormValid() || isGenerating}
+                  className="w-full bg-gradient-primary hover:opacity-90 border-0"
+                >
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="h-4 w-4 mr-2" />
+                      Download PDF
+                    </>
+                  )}
+                </Button>
+                
                 <Button
                   variant="outline"
                   onClick={() => setFormData({})}
-                  className="flex-1"
+                  className="w-full"
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />
-                  Clear
+                  Clear All Data
                 </Button>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          {/* Quick Actions */}
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle>Need to make changes?</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button variant="outline" className="w-full" asChild>
-                <Link to={`/designer/${template.templateId}`}>
-                  Edit Template
-                </Link>
-              </Button>
-              <Button variant="outline" className="w-full" asChild>
-                <Link to="/templates">
-                  Choose Different Template
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
+            {/* Template Info */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Template Info</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div>
+                  <div className="text-sm font-medium">Name</div>
+                  <div className="text-sm text-muted-foreground">{template?.name}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium">Description</div>
+                  <div className="text-sm text-muted-foreground">{template?.description}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium">Category</div>
+                  <Badge variant="secondary">{template?.category}</Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Edit Options */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Need Changes?</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button variant="outline" className="w-full" asChild>
+                  <Link to={`/designer/${template?.templateId}`}>
+                    Edit Template
+                  </Link>
+                </Button>
+                <Button variant="outline" className="w-full" asChild>
+                  <Link to="/templates">
+                    Choose Different Template
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </Layout>
