@@ -163,6 +163,29 @@ async getTemplates(page = 1, limit = 20, category?: string): Promise<ApiResponse
     }
   }
 
+  async generateCustomLabel(request: PreviewLabelRequest): Promise<Blob | null> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/labels/generate-custom`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API error details:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, details: ${errorText}`);
+      }
+
+      return await response.blob();
+    } catch (error) {
+      console.error('Custom label generation failed:', error);
+      return null;
+    }
+  }
+
   async previewLabel(request: PreviewLabelRequest): Promise<Blob | null> {
     try {
       const response = await fetch(`${API_BASE_URL}/labels/preview`, {

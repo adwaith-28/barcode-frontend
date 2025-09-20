@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { useDesignerStore } from '@/stores/designerStore';
 import { DATA_FIELDS } from '@/types';
 import { Settings, Layers, Type, Palette } from 'lucide-react';
+import CanvasPresetSelector from './CanvasPresetSelector';
 
 const PropertyPanel = () => {
   const {
@@ -692,58 +693,8 @@ case 'logo':
           </Card>
         )}
 
-{/* Template Settings */}
-<Card>
-  <CardHeader className="pb-3">
-    <CardTitle className="text-sm flex items-center">
-      <Palette className="h-4 w-4 mr-2" />
-      Template Settings
-    </CardTitle>
-  </CardHeader>
-  <CardContent className="pt-0 space-y-4">
-    <div>
-      <Label htmlFor="bgColor" className="text-xs">Background Color</Label>
-      <Input
-        id="bgColor"
-        type="color"
-        value={currentTemplate.backgroundColor || '#ffffff'}
-        onChange={(e) => {
-          updateTemplateBackground(e.target.value);
-        }}
-        className="h-8"
-      />
-    </div>
-
-      <div className="grid grid-cols-2 gap-2">
-        <div>
-          <Label htmlFor="canvasWidth" className="text-xs">Canvas Width</Label>
-          <Input
-            id="canvasWidth"
-            type="number"
-            value={currentTemplate.width}
-            className="h-8"
-            onChange={(e) => {
-              const newWidth = parseInt(e.target.value) || 400;
-              updateTemplateSize(newWidth, currentTemplate.height);
-            }}
-          />
-        </div>
-        <div>
-          <Label htmlFor="canvasHeight" className="text-xs">Canvas Height</Label>
-          <Input
-            id="canvasHeight"
-            type="number"
-            value={currentTemplate.height}
-            className="h-8"
-            onChange={(e) => {
-              const newHeight = parseInt(e.target.value) || 300;
-              updateTemplateSize(currentTemplate.width, newHeight);
-            }}
-          />
-        </div>
-      </div>
-    </CardContent>
-  </Card>
+{/* Canvas Preset Selector */}
+<CanvasPresetSelector />
 
       </div>
     </div>

@@ -174,11 +174,17 @@ export const ELEMENT_TYPES = [
   { type: 'line', label: 'Line/Divider', category: 'SHAPES' },
 ] as const;
 
-// Canvas presets
+// Canvas presets - Standard label sizes in points (1 point = 1/72 inch)
 export const CANVAS_PRESETS = [
-  { name: 'Business Card', width: 350, height: 200 },
-  { name: 'Product Label', width: 400, height: 300 },
-  { name: 'Shipping Label', width: 600, height: 400 },
+  { name: 'Business Card', width: 350, height: 200, description: 'Standard business card' },
+  { name: 'Product Label (Small)', width: 300, height: 200, description: 'Small product label' },
+  { name: 'Product Label (Medium)', width: 400, height: 300, description: 'Medium product label' },
+  { name: 'Product Label (Large)', width: 500, height: 400, description: 'Large product label' },
+  { name: 'Shipping Label (4x6)', width: 432, height: 288, description: '4" x 6" shipping label' },
+  { name: 'Shipping Label (6x4)', width: 288, height: 432, description: '6" x 4" shipping label' },
+  { name: 'A4 Label', width: 595, height: 842, description: 'A4 size label' },
+  { name: 'Custom Badge', width: 200, height: 200, description: 'Square badge' },
+  { name: 'Wide Banner', width: 800, height: 200, description: 'Wide banner format' },
 ] as const;
 
 // Data field options

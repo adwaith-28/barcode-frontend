@@ -82,9 +82,12 @@ const GeneratePage = () => {
 
     setIsGenerating(true);
     try {
-      const blob = await apiService.generateLabel({
+      // Use custom generate endpoint with layout JSON
+      const blob = await apiService.generateCustomLabel({
         templateId: parseInt(id),
-        data: formData
+        layoutJson: template.layoutJson,
+        data: formData,
+        format: 'pdf'
       });
 
       if (blob) {

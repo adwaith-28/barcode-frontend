@@ -328,23 +328,23 @@ export const useDesignerStore = create<DesignerStore>((set, get) => ({
   },
 
   updateTemplateSize: (width: number, height: number) => {
-  const state = get();
-  if (!state.currentTemplate) return;
+    const state = get();
+    if (!state.currentTemplate) return;
 
-  const updatedTemplate = {
-    ...state.currentTemplate,
-    width,
-    height
-  };
+    const updatedTemplate = {
+      ...state.currentTemplate,
+      width,
+      height
+    };
 
-  set({
-    currentTemplate: updatedTemplate,
-    canvasSettings: { ...state.canvasSettings, width, height },
-    isDirty: true,
-  });
+    set({
+      currentTemplate: updatedTemplate,
+      canvasSettings: { ...state.canvasSettings, width, height },
+      isDirty: true,
+    });
 
-  get().saveToHistory();
-},
+    get().saveToHistory();
+  },
 
 updateTemplateBackground: (backgroundColor: string) => {
   const state = get();
