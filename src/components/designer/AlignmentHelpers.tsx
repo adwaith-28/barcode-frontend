@@ -33,19 +33,6 @@ const AlignmentHelpers: React.FC<AlignmentHelpersProps> = ({
     const selectedTop = selectedElement.y;
     const selectedBottom = selectedElement.y + selectedElement.height;
 
-    // Canvas center lines
-    lines.push({
-      type: 'vertical',
-      position: canvasWidth / 2,
-      color: '#3b82f6',
-      label: 'Canvas Center'
-    });
-    lines.push({
-      type: 'horizontal',
-      position: canvasHeight / 2,
-      color: '#3b82f6',
-      label: 'Canvas Center'
-    });
 
     // Check alignment with other elements
     allElements.forEach(element => {

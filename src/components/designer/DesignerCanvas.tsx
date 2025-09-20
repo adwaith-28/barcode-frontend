@@ -25,7 +25,8 @@ const DesignerCanvas = () => {
     : null;
 
   const handleCanvasClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
+    // Clear selection when clicking on canvas background or container
+    if (e.target === e.currentTarget || e.target === canvasRef.current) {
       clearSelection();
     }
   };
@@ -193,6 +194,7 @@ const DesignerCanvas = () => {
               ...gridStyle,
               backgroundColor: currentTemplate.backgroundColor || '#ffffff',
             }}
+            onClick={handleCanvasClick}
           >
             {/* Render Elements */}
             {currentTemplate.elements.map((element) => (

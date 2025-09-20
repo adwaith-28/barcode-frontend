@@ -17,9 +17,12 @@ const CanvasElement: React.FC<CanvasElementProps> = ({
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
+  const [isRotating, setIsRotating] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [elementStart, setElementStart] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const [resizeHandle, setResizeHandle] = useState<string | null>(null);
+  const [rotationStart, setRotationStart] = useState(0);
+  const [initialMousePos, setInitialMousePos] = useState({ x: 0, y: 0 });
   
   const { updateElement } = useDesignerStore();
 
@@ -43,6 +46,20 @@ const CanvasElement: React.FC<CanvasElementProps> = ({
     setResizeHandle(handle);
     setDragStart({ x: e.clientX, y: e.clientY });
     setElementStart({ x: element.x, y: element.y, width: element.width, height: element.height });
+  };
+
+  const handleRotationMouseDown = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsRotating(true);
+    
+    // Get the element's center position on screen
+    const elementRect = e.currentTarget.getBoundingClientRect();
+    const elementCenterX = elementRect.left + elementRect.width / 2;
+    const elementCenterY = elementRect.top + elementRect.height / 2;
+    
+    setDragStart({ x: elementCenterX, y: elementCenterY });
+    setInitialMousePos({ x: e.clientX, y: e.clientY });
+    setRotationStart(element.rotation || 0);
   };
 
   const getMinimumSize = (elementType: string) => {
@@ -91,6 +108,37 @@ const CanvasElement: React.FC<CanvasElementProps> = ({
       updateElement(element.id, {
         x: newX,
         y: newY,
+      });
+    } else if (isRotating) {
+      // Get element center position
+      const elementCenterX = dragStart.x;
+      const elementCenterY = dragStart.y;
+      
+      // Calculate angles from element center to initial and current mouse positions
+      const initialAngle = Math.atan2(initialMousePos.y - elementCenterY, initialMousePos.x - elementCenterX);
+      const currentAngle = Math.atan2(e.clientY - elementCenterY, e.clientX - elementCenterX);
+      
+      // Calculate the angle difference
+      let angleDiff = currentAngle - initialAngle;
+      
+      // Convert to degrees
+      angleDiff = angleDiff * (180 / Math.PI);
+      
+      // Apply the rotation difference to the starting rotation
+      const newRotation = rotationStart + angleDiff;
+      
+      // Optional: Snap to 15-degree increments if Shift is held
+      let finalRotation = newRotation;
+      if (e.shiftKey) {
+        finalRotation = Math.round(newRotation / 15) * 15;
+      }
+      
+      // Normalize to 0-360 range
+      let normalizedRotation = finalRotation % 360;
+      if (normalizedRotation < 0) normalizedRotation += 360;
+      
+      updateElement(element.id, {
+        rotation: normalizedRotation,
       });
     } else if (isResizing && resizeHandle) {
       const deltaX = (e.clientX - dragStart.x) / zoom;
@@ -164,11 +212,12 @@ const CanvasElement: React.FC<CanvasElementProps> = ({
   const handleMouseUp = () => {
     setIsDragging(false);
     setIsResizing(false);
+    setIsRotating(false);
     setResizeHandle(null);
   };
 
   React.useEffect(() => {
-    if (isDragging || isResizing) {
+    if (isDragging || isResizing || isRotating) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
       
@@ -177,7 +226,7 @@ const CanvasElement: React.FC<CanvasElementProps> = ({
         document.removeEventListener('mouseup', handleMouseUp);
       };
     }
-  }, [isDragging, isResizing, dragStart, elementStart, zoom, resizeHandle]);
+  }, [isDragging, isResizing, isRotating, dragStart, elementStart, zoom, resizeHandle, rotationStart, initialMousePos]);
 
   const renderElement = () => {
     switch (element.type) {
@@ -254,7 +303,7 @@ const CanvasElement: React.FC<CanvasElementProps> = ({
 
       case 'image':
         const imageSrc = element.properties.src || element.properties.imageData;
-        if (imageSrc && typeof imageSrc === 'string') {
+        if (imageSrc && typeof imageSrc === 'string' && imageSrc.trim() !== '') {
           try {
             const src = imageSrc.includes(',') ? imageSrc : `data:image/png;base64,${imageSrc}`;
             return (
@@ -276,14 +325,14 @@ const CanvasElement: React.FC<CanvasElementProps> = ({
           }
         }
         return (
-          <div className="flex flex-col items-center justify-center h-full border-2 border-dashed border-gray-400 bg-gray-50 text-gray-600">
+          <div className="flex flex-col items-center justify-center h-full border-2 border-dashed border-orange-400 bg-orange-50 text-orange-600">
             <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
               <circle cx="8.5" cy="8.5" r="1.5"/>
               <polyline points="21,15 16,10 5,21"/>
             </svg>
-            <div className="text-xs font-medium">IMAGE</div>
-            <div className="text-xs mt-1">Click to upload</div>
+            <div className="text-xs font-medium">IMAGE REQUIRED</div>
+            <div className="text-xs mt-1">Upload image to save</div>
           </div>
         );
 
@@ -430,6 +479,34 @@ const CanvasElement: React.FC<CanvasElementProps> = ({
               />
             </>
           )}
+          
+          {/* Rotation handle */}
+          <div 
+            className={`absolute -top-8 left-1/2 transform -translate-x-1/2 w-4 h-4 border border-white rounded-full cursor-grab flex items-center justify-center transition-all duration-150 ${
+              isRotating 
+                ? 'bg-blue-500 scale-110 shadow-lg' 
+                : 'bg-canvas-handle hover:bg-blue-400 hover:scale-105'
+            }`}
+            onMouseDown={handleRotationMouseDown}
+            style={{ cursor: isRotating ? 'grabbing' : 'grab' }}
+            title="Hold and drag to rotate (Hold Shift for snap-to-grid)"
+          >
+            <svg 
+              className={`w-2 h-2 text-white transition-transform duration-150 ${
+                isRotating ? 'animate-spin' : ''
+              }`}
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" 
+              />
+            </svg>
+          </div>
         </>
       )}
     </div>

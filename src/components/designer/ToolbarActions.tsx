@@ -75,6 +75,17 @@ const ToolbarActions: React.FC<ToolbarActionsProps> = ({ templateId }) => {
     return Array.from(fields);
   };
 
+  // Validate image elements have uploaded images
+  const validateImageElements = (template: any) => {
+    const imageElements = template.elements.filter((element: any) => element.type === 'image');
+    const invalidImages = imageElements.filter((element: any) => {
+      const hasImage = element.properties?.src || element.properties?.imageData;
+      return !hasImage || hasImage.trim() === '';
+    });
+    
+    return invalidImages;
+  };
+
   // Save or update template
   const handleSave = async () => {
     if (!currentTemplate) return;
@@ -83,6 +94,17 @@ const ToolbarActions: React.FC<ToolbarActionsProps> = ({ templateId }) => {
       toast({
         title: "Name required",
         description: "Please enter a name for your template.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate image elements
+    const invalidImageElements = validateImageElements(currentTemplate);
+    if (invalidImageElements.length > 0) {
+      toast({
+        title: "Image validation failed",
+        description: `Please upload images for all image elements before saving. Found ${invalidImageElements.length} image element(s) without uploaded images.`,
         variant: "destructive"
       });
       return;
