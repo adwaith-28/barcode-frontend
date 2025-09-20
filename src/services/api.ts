@@ -8,7 +8,7 @@ import {
   PaginatedResponse 
 } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7181/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://soti-trace-api.azurewebsites.net/api';
 
 class ApiService {
 private async request<T>(
