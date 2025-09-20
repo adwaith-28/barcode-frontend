@@ -69,14 +69,28 @@ const CanvasElement: React.FC<CanvasElementProps> = ({
     }
   };
 
+  const snapToGrid = (value: number, gridSize: number) => {
+    return Math.round(value / gridSize) * gridSize;
+  };
+
   const handleMouseMove = (e: MouseEvent) => {
     if (isDragging) {
       const deltaX = (e.clientX - dragStart.x) / zoom;
       const deltaY = (e.clientY - dragStart.y) / zoom;
 
+      let newX = Math.max(0, elementStart.x + deltaX);
+      let newY = Math.max(0, elementStart.y + deltaY);
+
+      // Apply snap to grid if enabled
+      const { canvasSettings } = useDesignerStore.getState();
+      if (canvasSettings.snapToGrid) {
+        newX = snapToGrid(newX, canvasSettings.gridSize);
+        newY = snapToGrid(newY, canvasSettings.gridSize);
+      }
+
       updateElement(element.id, {
-        x: Math.max(0, elementStart.x + deltaX),
-        y: Math.max(0, elementStart.y + deltaY),
+        x: newX,
+        y: newY,
       });
     } else if (isResizing && resizeHandle) {
       const deltaX = (e.clientX - dragStart.x) / zoom;
@@ -363,6 +377,8 @@ const CanvasElement: React.FC<CanvasElementProps> = ({
         width: element.width,
         height: element.height,
         zIndex: element.zIndex,
+        transform: `rotate(${element.rotation || 0}deg)`,
+        transformOrigin: 'center center',
       }}
       onMouseDown={handleMouseDown}
     >

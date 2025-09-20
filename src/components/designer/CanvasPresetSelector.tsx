@@ -47,23 +47,23 @@ const CanvasPresetSelector = () => {
         </div>
 
         {/* Preset Options */}
-        <div className="space-y-2">
+        <div className="space-y-2 max-h-64 overflow-y-auto">
           {CANVAS_PRESETS.map((preset) => (
             <Button
               key={`${preset.width}x${preset.height}`}
               variant={currentPreset?.name === preset.name ? "default" : "outline"}
               size="sm"
-              className="w-full justify-start h-auto p-3"
+              className="w-full justify-start h-auto p-2 text-left"
               onClick={() => handlePresetSelect(preset.width, preset.height)}
             >
-              <div className="flex flex-col items-start w-full">
-                <div className="flex items-center justify-between w-full">
-                  <span className="font-medium">{preset.name}</span>
-                  <span className="text-xs text-muted-foreground">
+              <div className="flex flex-col items-start w-full min-w-0">
+                <div className="flex items-center justify-between w-full min-w-0">
+                  <span className="font-medium text-sm truncate flex-1 mr-2">{preset.name}</span>
+                  <span className="text-xs text-muted-foreground flex-shrink-0">
                     {preset.width} × {preset.height}px
                   </span>
                 </div>
-                <span className="text-xs text-muted-foreground mt-1">
+                <span className="text-xs text-muted-foreground mt-1 truncate w-full">
                   {preset.description}
                 </span>
               </div>

@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useDesignerStore } from '@/stores/designerStore';
 import CanvasElement from './CanvasElement';
+import AlignmentHelpers from './AlignmentHelpers';
 import { Button } from '@/components/ui/button';
 import { ZoomIn, ZoomOut, Grid3X3, Move } from 'lucide-react';
 
@@ -18,6 +19,10 @@ const DesignerCanvas = () => {
     updateCanvasSettings,
     selectElementsInArea
   } = useDesignerStore();
+
+  const selectedElement = selectedElements.length === 1 
+    ? currentTemplate?.elements.find(el => el.id === selectedElements[0])
+    : null;
 
   const handleCanvasClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -199,6 +204,15 @@ const DesignerCanvas = () => {
                 zoom={canvasSettings.zoom}
               />
             ))}
+
+            {/* Alignment Helpers */}
+            <AlignmentHelpers
+              selectedElement={selectedElement}
+              allElements={currentTemplate.elements}
+              canvasWidth={currentTemplate.width}
+              canvasHeight={currentTemplate.height}
+              zoom={canvasSettings.zoom}
+            />
 
             {/* Selection Rectangle (for area selection) */}
             {isDragging && (

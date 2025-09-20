@@ -111,6 +111,22 @@ const PropertyPanel = () => {
             />
           </div>
         </div>
+
+        <div>
+          <Label htmlFor="rotation" className="text-xs">Rotation</Label>
+          <div className="flex items-center space-x-2">
+            <Input
+              id="rotation"
+              type="number"
+              value={selectedElement.rotation || 0}
+              onChange={(e) => handlePositionChange('rotation', parseInt(e.target.value) || 0)}
+              className="h-8"
+              min="0"
+              max="360"
+            />
+            <span className="text-xs text-muted-foreground">°</span>
+          </div>
+        </div>
       </div>
     );
 

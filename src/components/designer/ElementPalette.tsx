@@ -48,6 +48,7 @@ const ElementPalette = () => {
       y: 50,
       width: 150,
       height: 40,
+      rotation: 0,
       zIndex: 1,
       properties: getDefaultProperties(elementType),
       style: getDefaultStyle(elementType)

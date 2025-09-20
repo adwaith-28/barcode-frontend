@@ -29,6 +29,7 @@ export interface LayoutElement {
   y: number;
   width: number;
   height: number;
+  rotation: number; // Rotation in degrees
   zIndex: number;
   properties: Record<string, any>;
   style: Record<string, any>;
